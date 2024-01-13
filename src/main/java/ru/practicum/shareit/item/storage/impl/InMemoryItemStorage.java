@@ -48,11 +48,12 @@ public class InMemoryItemStorage implements ItemStorage {
         if (Objects.isNull(text) || text.isBlank()) {
             return Collections.emptyList();
         }
+        String textInLowerCase = text.toLowerCase(Locale.ROOT);
         return items.values()
                 .stream()
                 .filter(item -> item.isAvailable()
-                        && (item.getName().toLowerCase(Locale.ROOT).contains(text.toLowerCase(Locale.ROOT))
-                        || item.getDescription().toLowerCase(Locale.ROOT).contains(text.toLowerCase(Locale.ROOT))))
+                        && (item.getName().toLowerCase(Locale.ROOT).contains(textInLowerCase)
+                        || item.getDescription().toLowerCase(Locale.ROOT).contains(textInLowerCase)))
                 .collect(Collectors.toList());
     }
 }

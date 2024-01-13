@@ -22,10 +22,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User createUser(CreateUserDto dto) {
-        System.out.println("aaaa1");
         checkEmailIsUsed(dto.getEmail());
         User user = UserMapper.mapToMode(dto);
-        System.out.println("aaaa2");
         return userStorage.save(user);
     }
 

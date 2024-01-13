@@ -11,7 +11,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.user.model.User;
-import ru.practicum.shareit.user.service.UserService;
+import ru.practicum.shareit.user.storage.UserStorage;
 
 import java.util.Collection;
 import java.util.List;
@@ -22,13 +22,18 @@ import java.util.Objects;
 public class ItemServiceImpl implements ItemService {
 
     private final ItemStorage itemStorage;
-    private final UserService userService;
+    private final UserStorage userStorage;
 
     @Override
     public Item createItem(CreateItemDto dto) {
-        User owner = userService.getUserById(dto.getOwnerId());
+        User owner = getUserById(dto.getOwnerId());
         Item item = ItemMapper.toModel(dto, owner);
         return itemStorage.save(item);
+    }
+
+    private User getUserById(int userId) {
+        return userStorage.findById(userId)
+                .orElseThrow(() -> new APINotFoundException("Пользователь id %s не найден", userId));
     }
 
     @Override
