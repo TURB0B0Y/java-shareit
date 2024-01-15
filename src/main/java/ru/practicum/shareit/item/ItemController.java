@@ -4,9 +4,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import ru.practicum.shareit.item.dto.CreateItemDto;
-import ru.practicum.shareit.item.dto.ItemDto;
+import ru.practicum.shareit.item.dto.*;
+import ru.practicum.shareit.item.mapper.CommentMapper;
 import ru.practicum.shareit.item.mapper.ItemMapper;
+import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
@@ -56,19 +57,15 @@ public class ItemController {
     }
 
     @GetMapping("/{itemId}")
-    public ItemDto getItemById(@PathVariable @PositiveOrZero int itemId, @RequestHeader("X-Sharer-User-Id") int userId) {
+    public ItemBookingCommentDto getItemById(@PathVariable @PositiveOrZero int itemId, @RequestHeader("X-Sharer-User-Id") int userId) {
         log.info("user {} get item {}", userId, itemId);
-        Item item = itemService.getById(itemId);
-        return ItemMapper.toItemDto(item);
+        return itemService.getItemBookingById(itemId, userId);
     }
 
     @GetMapping
-    public List<ItemDto> getAll(@RequestHeader("X-Sharer-User-Id") int userId) {
+    public Collection<ItemBookingDto> getAll(@RequestHeader("X-Sharer-User-Id") int userId) {
         log.info("user {} get all items", userId);
-        Collection<Item> items = itemService.getAllByOwnerId(userId);
-        return items.stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
+        return itemService.getAllByOwnerId(userId);
     }
 
     @GetMapping("/search")
@@ -78,6 +75,17 @@ public class ItemController {
         return items.stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
+    }
+
+    @PostMapping("{itemId}/comment")
+    public CommentDto addComment(
+            @RequestBody @Valid CommentDto dto,
+            @PathVariable int itemId,
+            @RequestHeader("X-Sharer-User-Id") int userId
+    ) {
+        log.info("addComment {} {} {}", userId, itemId, dto);
+        Comment comment = itemService.addComment(dto, itemId, userId);
+        return CommentMapper.toDto(comment);
     }
 
 }
