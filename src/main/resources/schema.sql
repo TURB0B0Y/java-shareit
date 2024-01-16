@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS ITEMS (
     DESCRIPTION     VARCHAR(512)                            NOT NULL,
     IS_AVAILABLE    BOOLEAN                                 NOT NULL,
     OWNER_ID        BIGINT                                  NOT NULL,
-    REQUEST_ID        BIGINT                                NOT NULL,
+    REQUEST_ID      BIGINT                                  NULL,
     CONSTRAINT PK_ITEMS PRIMARY KEY (ITEM_ID),
     CONSTRAINT UQ_ITEMS_OWNER UNIQUE (OWNER_ID, NAME),
     CONSTRAINT ITEMS_OWNER_FK FOREIGN KEY (OWNER_ID) REFERENCES USERS(USER_ID)
