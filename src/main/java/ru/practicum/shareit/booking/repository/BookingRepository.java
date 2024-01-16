@@ -1,6 +1,7 @@
 package ru.practicum.shareit.booking.repository;
 
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -41,14 +42,17 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
     List<Booking> findByBookerIdAndEndIsAfterAndStartIsBefore(int userId, LocalDateTime end, LocalDateTime start, Pageable pageable);
 
-    Optional<Booking> findFirstByItem_IdAndStartBeforeOrderByEndDesc(int itemId, LocalDateTime nowTime);
+    Optional<Booking> findFirstByItem_IdAndStartBefore(int itemId, LocalDateTime nowTime, Sort sort);
 
-    Optional<Booking> findFirstByItem_IdAndStartAfterAndStatusNotOrderByStart(int itemId, LocalDateTime nowTime, BookingStatus status);
+    Optional<Booking> findFirstByItem_IdAndStartAfterAndStatusNot(int itemId, LocalDateTime nowTime, BookingStatus status, Sort sort);
 
-    Collection<Booking> findAllByItemInAndStartBeforeOrderByEndDesc(Collection<Item> items, LocalDateTime nowTime);
+    Collection<Booking> findAllByItemInAndStartBefore(Collection<Item> items, LocalDateTime nowTime, Sort sort);
 
-    Collection<Booking> findAllByItemInAndStartAfterAndStatusNotOrderByStart(Collection<Item> items, LocalDateTime nowTime, BookingStatus bookingStatus);
+    Collection<Booking> findAllByItemInAndStartAfterAndStatusNot(Collection<Item> items, LocalDateTime nowTime, BookingStatus bookingStatus, Sort sort);
 
     Optional<Booking> findFirstByItem_IdAndBooker_IdAndEndBefore(int itemId, int userId, LocalDateTime now);
 
+    @Query("select count(1)>0 from Booking b where status = :bookingStatus" +
+            " and ((b.start between :startTime and :endTime) or (b.end between :startTime and :endTime))")
+    boolean existsByStatusAndStartBetweenOrEndBetween(BookingStatus bookingStatus, LocalDateTime startTime, LocalDateTime endTime);
 }

@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.model.Booking;
@@ -82,6 +83,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public ItemBookingCommentDto getItemBookingById(int itemId, int userId) {
         Item item = getById(itemId);
         List<Comment> comments = commentRepository.findAllByItem_Id(itemId);
@@ -89,12 +91,13 @@ public class ItemServiceImpl implements ItemService {
             return ItemMapper.toItemBookingCommentDto(item, null, null, comments);
         }
         LocalDateTime nowTime = LocalDateTime.now();
-        Booking lastBooking = bookingRepository.findFirstByItem_IdAndStartBeforeOrderByEndDesc(itemId, nowTime)
+        Booking lastBooking = bookingRepository.findFirstByItem_IdAndStartBefore(itemId, nowTime, Sort.by(Sort.Direction.DESC, "end"))
                 .orElse(null);
-        Booking nextBooking = bookingRepository.findFirstByItem_IdAndStartAfterAndStatusNotOrderByStart(
+        Booking nextBooking = bookingRepository.findFirstByItem_IdAndStartAfterAndStatusNot(
                 itemId,
                 nowTime,
-                BookingStatus.REJECTED
+                BookingStatus.REJECTED,
+                Sort.by(Sort.Direction.ASC, "start")
         ).orElse(null);
         return ItemMapper.toItemBookingCommentDto(item, nextBooking, lastBooking, comments);
     }
@@ -107,14 +110,19 @@ public class ItemServiceImpl implements ItemService {
 
         LocalDateTime nowTime = LocalDateTime.now();
 
-        Map<Integer, Booking> lastBookings = bookingRepository.findAllByItemInAndStartBeforeOrderByEndDesc(items, nowTime)
+        Map<Integer, Booking> lastBookings = bookingRepository.findAllByItemInAndStartBefore(
+                        items,
+                        nowTime,
+                        Sort.by(Sort.Direction.DESC, "end")
+                )
                 .stream()
                 .collect(Collectors.toMap(booking -> booking.getItem().getId(), booking -> booking, (o, o2) -> o));
 
-        Map<Integer, Booking> nextBookings = bookingRepository.findAllByItemInAndStartAfterAndStatusNotOrderByStart(
+        Map<Integer, Booking> nextBookings = bookingRepository.findAllByItemInAndStartAfterAndStatusNot(
                         items,
                         nowTime,
-                        BookingStatus.REJECTED
+                        BookingStatus.REJECTED,
+                        Sort.by(Sort.Direction.ASC, "start")
                 )
                 .stream()
                 .collect(Collectors.toMap(booking -> booking.getItem().getId(), booking -> booking, (o, o2) -> o));
@@ -139,6 +147,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public Comment addComment(CommentDto dto, int itemId, int userId) {
         LocalDateTime nowTime = LocalDateTime.now();
         Booking booking = bookingRepository.findFirstByItem_IdAndBooker_IdAndEndBefore(itemId, userId, nowTime)

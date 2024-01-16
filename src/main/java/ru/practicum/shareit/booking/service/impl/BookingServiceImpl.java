@@ -58,6 +58,17 @@ public class BookingServiceImpl implements BookingService {
             throw new APINotFoundException("Предмет %s недоступен для бронирования", item.getId());
         }
 
+        // Проверка работает однако тесты не расчитаны на это и создают несколько пересекающихся брониронирований
+        // Например бронирование 5 будет пересекаться с бронированием 2 и 4
+        // Пример дат:
+        // id=2, start=2024-01-17T20:22:03, end=2024-01-18T20:22:03
+        // id=4, start=2024-01-16T21:22:05, end=2024-01-16T22:22:05
+        // ============
+        // id=5, start=2024-01-16T20:22:13, end=2024-01-17T20:22:10
+        /*if (bookingRepository.existsByStatusAndStartBetweenOrEndBetween(BookingStatus.APPROVED, dto.getStart(), dto.getEnd())) {
+            throw new APINotFoundException("Предмет %s уже забронирован на указанный временной промежуток", item.getId());
+        }*/
+
         User booker = getUserById(userId);
 
         Booking booking = BookingMapper.toModel(dto, booker, item);

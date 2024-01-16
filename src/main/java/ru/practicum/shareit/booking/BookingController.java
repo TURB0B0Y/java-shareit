@@ -56,8 +56,8 @@ public class BookingController {
     public List<BookingDto> getAllBookingsByBookerId(
             @RequestHeader("X-Sharer-User-Id") int userId,
             @RequestParam(defaultValue = "ALL") BookingState state,
-            @RequestParam(defaultValue = "0", required = false) @Min(0) int from,
-            @RequestParam(defaultValue = "10", required = false) @Min(1) int size
+            @RequestParam(defaultValue = "0") @Min(0) int from,
+            @RequestParam(defaultValue = "10") @Min(1) int size
     ) {
         log.info("getAllBookingsByBookerId {} {} {}", state, from, size);
         List<Booking> bookings = bookingService.getAllBookingsByBookerId(userId, state, from, size);
@@ -68,8 +68,8 @@ public class BookingController {
     public List<BookingDto> getAllBookingItemsByBookerId(
             @RequestHeader("X-Sharer-User-Id") int userId,
             @RequestParam(defaultValue = "ALL") BookingState state,
-            @RequestParam(defaultValue = "0", required = false) @Min(0) int from,
-            @RequestParam(defaultValue = "10", required = false) @Min(1) int size
+            @RequestParam(defaultValue = "0") @Min(0) int from,
+            @RequestParam(defaultValue = "10") @Min(1) int size
     ) {
         log.info("getAllBookingItemsByBookerId {} {} {}", state, from, size);
         List<Booking> bookings = bookingService.getAllBookingByItemsByOwnerId(userId, state, from, size);

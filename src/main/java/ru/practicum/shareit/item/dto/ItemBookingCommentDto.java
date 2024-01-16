@@ -20,8 +20,11 @@ public class ItemBookingCommentDto {
     private Boolean available;
     private Integer ownerId;
     private Integer requestId;
+    @ToString.Exclude
     private ShortBookingDto lastBooking;
+    @ToString.Exclude
     private ShortBookingDto nextBooking;
+    @ToString.Exclude
     private Collection<CommentDto> comments;
 
 }
