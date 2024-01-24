@@ -1,6 +1,7 @@
 package ru.practicum.shareit.item.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +18,8 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.repository.CommentRepository;
 import ru.practicum.shareit.item.repository.ItemRepository;
 import ru.practicum.shareit.item.service.ItemService;
+import ru.practicum.shareit.request.model.ItemRequest;
+import ru.practicum.shareit.request.repository.ItemRequestRepository;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.repository.UserRepository;
 
@@ -32,12 +35,17 @@ public class ItemServiceImpl implements ItemService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
     private final BookingRepository bookingRepository;
+    private final ItemRequestRepository itemRequestRepository;
 
     @Override
     @Transactional
     public Item createItem(CreateItemDto dto) {
         User owner = getUserById(dto.getOwnerId());
-        Item item = ItemMapper.toModel(dto, owner);
+        ItemRequest itemRequest = null;
+        if (Objects.nonNull(dto.getRequestId())) {
+            itemRequest = getItemRequestById(dto.getRequestId());
+        }
+        Item item = ItemMapper.toModel(dto, owner, itemRequest);
         return itemRepository.save(item);
     }
 
@@ -104,9 +112,9 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public Collection<ItemBookingDto> getAllByOwnerId(int ownerId) {
+    public Collection<ItemBookingDto> getAllByOwnerId(int ownerId, int from, int size) {
 
-        Collection<Item> items = itemRepository.findAllByOwnerId(ownerId);
+        Collection<Item> items = itemRepository.findAllByOwnerId(ownerId, PageRequest.of(from / size, size));
 
         LocalDateTime nowTime = LocalDateTime.now();
 
@@ -139,11 +147,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<Item> search(String text) {
+    public List<Item> search(String text, int from, int size) {
         if (Objects.isNull(text) || text.isBlank()) {
             return Collections.emptyList();
         }
-        return itemRepository.findAllByNameOrDescription(text);
+        return itemRepository.findAllByNameOrDescription(text, PageRequest.of(from / size, size));
     }
 
     @Override
@@ -158,6 +166,11 @@ public class ItemServiceImpl implements ItemService {
         comment.setText(dto.getText());
         comment.setCreated(nowTime);
         return commentRepository.save(comment);
+    }
+
+    private ItemRequest getItemRequestById(int itemRequestId) {
+        return itemRequestRepository.findById(itemRequestId)
+                .orElseThrow(() -> new APINotFoundException("Запрос id %s не найден", itemRequestId));
     }
 
 }

@@ -3,6 +3,7 @@ package ru.practicum.shareit.item;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.item.dto.*;
 import ru.practicum.shareit.item.mapper.CommentMapper;
@@ -12,7 +13,7 @@ import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.Collection;
 import java.util.List;
@@ -23,6 +24,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 @RequestMapping("/items")
 @SuppressWarnings("unused")
+@Validated
 public class ItemController {
 
     private final ItemService itemService;
@@ -63,15 +65,24 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<ItemBookingDto> getAll(@RequestHeader("X-Sharer-User-Id") int userId) {
-        log.info("user {} get all items", userId);
-        return itemService.getAllByOwnerId(userId);
+    public Collection<ItemBookingDto> getAll(
+            @RequestHeader("X-Sharer-User-Id") int userId,
+            @RequestParam(defaultValue = "0") @Min(0) int from,
+            @RequestParam(defaultValue = "10") @Min(1) int size
+    ) {
+        log.info("user {} get all items {} {}", userId, from, size);
+        return itemService.getAllByOwnerId(userId, from, size);
     }
 
     @GetMapping("/search")
-    public List<ItemDto> search(@RequestParam @NotBlank String text, @RequestHeader("X-Sharer-User-Id") int userId) {
-        log.info("user {} search item {}", userId, text);
-        List<Item> items = itemService.search(text);
+    public List<ItemDto> search(
+            @RequestParam String text,
+            @RequestHeader("X-Sharer-User-Id") int userId,
+            @RequestParam(defaultValue = "0") @Min(0) int from,
+            @RequestParam(defaultValue = "10") @Min(1) int size
+    ) {
+        log.info("user {} search item {} {} {}", userId, text, from, size);
+        List<Item> items = itemService.search(text, from, size);
         return items.stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
