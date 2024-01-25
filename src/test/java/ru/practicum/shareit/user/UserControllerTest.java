@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.practicum.shareit.exception.APINotFoundException;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.mapper.UserMapper;
@@ -17,7 +18,8 @@ import ru.practicum.shareit.user.service.UserService;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -42,7 +44,10 @@ public class UserControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(userDto.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(userDto.getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email").value(userDto.getEmail()));
     }
 
     @Test
@@ -56,7 +61,10 @@ public class UserControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(userDto.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(userDto.getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email").value(userDto.getEmail()));
     }
 
     @Test
@@ -70,7 +78,8 @@ public class UserControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error").exists());
     }
 
     @Test
@@ -84,7 +93,11 @@ public class UserControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(userDto.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value(userDto.getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].email").value(userDto.getEmail()));
     }
 
     @Test
@@ -98,6 +111,9 @@ public class UserControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(userDto.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(userDto.getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.email").value(userDto.getEmail()));
     }
 }

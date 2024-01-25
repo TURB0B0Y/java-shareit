@@ -39,7 +39,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Transactional(readOnly = true)
     public List<ItemRequestWithItemsDto> getRequests(int userId) {
         if (notExistsUserById(userId)) {
-            throw new APINotFoundException("Пользователь id %s не найден", userId);
+            throw new APINotFoundException("Пользователь id %d не найден", userId);
         }
         return itemRequestRepository.findAllByRequesterId(
                         userId,
@@ -53,7 +53,7 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Transactional(readOnly = true)
     public List<ItemRequestWithItemsDto> getRequests(int userId, int from, int size) {
         if (notExistsUserById(userId)) {
-            throw new APINotFoundException("Пользователь id %s не найден", userId);
+            throw new APINotFoundException("Пользователь id %d не найден", userId);
         }
         return itemRequestRepository.findAllByRequesterIdIsNot(userId, PageRequest.of(
                         from / size,
@@ -69,16 +69,16 @@ public class ItemRequestServiceImpl implements ItemRequestService {
     @Transactional(readOnly = true)
     public ItemRequestWithItemsDto getRequestById(int userId, int requestId) {
         if (notExistsUserById(userId)) {
-            throw new APINotFoundException("Пользователь id %s не найден", userId);
+            throw new APINotFoundException("Пользователь id %d не найден", userId);
         }
         ItemRequest request = itemRequestRepository.findById(requestId)
-                .orElseThrow(() -> new APINotFoundException("Запрос id %s не найден", requestId));
+                .orElseThrow(() -> new APINotFoundException("Запрос id %d не найден", requestId));
         return ItemRequestMapper.toWithItemsDto(request);
     }
 
     private User getUserById(int userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new APINotFoundException("Пользователь id %s не найден", userId));
+                .orElseThrow(() -> new APINotFoundException("Пользователь id %d не найден", userId));
     }
 
     private boolean notExistsUserById(int userId) {

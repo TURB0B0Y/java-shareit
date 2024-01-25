@@ -36,7 +36,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(readOnly = true)
     public Booking getBookingById(int bookingId) {
         return bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new APINotFoundException("Бронирование id %s не найдено", bookingId));
+                .orElseThrow(() -> new APINotFoundException("Бронирование id %d не найдено", bookingId));
     }
 
     @Override
@@ -75,10 +75,10 @@ public class BookingServiceImpl implements BookingService {
     public Booking approveBooking(int bookingId, boolean approved, int userId) {
         Booking booking = getBookingById(bookingId);
         if (!booking.getItem().getOwner().getId().equals(userId)) {
-            throw new APINotFoundException("Бронирование %s не найдено", bookingId);
+            throw new APINotFoundException("Бронирование %d не найдено", bookingId);
         }
         if (booking.getStatus() != BookingStatus.WAITING) {
-            throw new APIBadRequestException("Бронирование %s не находится в статусе ожидания", bookingId);
+            throw new APIBadRequestException("Бронирование %d не находится в статусе ожидания", bookingId);
         }
         if (approved) {
             booking.setStatus(BookingStatus.APPROVED);
@@ -95,7 +95,7 @@ public class BookingServiceImpl implements BookingService {
         int itemOwnerId = booking.getItem().getOwner().getId();
         int bookerOwnerId = booking.getBooker().getId();
         if (itemOwnerId != userId && bookerOwnerId != userId) {
-            throw new APINotFoundException("Бронирование %s не найдено", bookingId);
+            throw new APINotFoundException("Бронирование %d не найдено", bookingId);
         }
         return booking;
     }
@@ -104,7 +104,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(readOnly = true)
     public List<Booking> getAllBookingsByBookerId(int userId, BookingState state, int from, int size) {
         if (!userRepository.existsById(userId)) {
-            throw new APINotFoundException("Пользователь %s не найден", userId);
+            throw new APINotFoundException("Пользователь %d не найден", userId);
         }
 
         List<Booking> bookings;
@@ -171,12 +171,12 @@ public class BookingServiceImpl implements BookingService {
 
     private User getUserById(int userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new APINotFoundException("Пользователь id %s не найден", userId));
+                .orElseThrow(() -> new APINotFoundException("Пользователь id %d не найден", userId));
     }
 
     private Item getItemById(int itemId) {
         return itemRepository.findById(itemId)
-                .orElseThrow(() -> new APINotFoundException("Предмет %s не найден ", itemId));
+                .orElseThrow(() -> new APINotFoundException("Предмет %d не найден ", itemId));
     }
 
 }

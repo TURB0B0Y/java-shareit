@@ -7,9 +7,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import ru.practicum.shareit.booking.dto.CreateBookingDto;
 import ru.practicum.shareit.booking.mapper.BookingMapper;
+import ru.practicum.shareit.booking.model.Booking;
+import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.exception.CustomExceptionHandler;
 import ru.practicum.shareit.item.model.Item;
@@ -54,8 +57,10 @@ public class BookingControllerTest {
                 .start(LocalDateTime.now())
                 .end(LocalDateTime.now().plusHours(1))
                 .build();
+        Booking model = BookingMapper.toModel(bookingDto, user, item);
+        model.setId(1);
         when(bookingService.approveBooking(anyInt(), anyBoolean(), anyInt()))
-                .thenReturn(BookingMapper.toModel(bookingDto, user, item));
+                .thenReturn(model);
 
         mvc.perform(patch("/bookings/1")
                         .header("X-Sharer-User-Id", "1")
@@ -64,7 +69,15 @@ public class BookingControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(model.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.item.id").value(model.getItem().getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.item.name").value(model.getItem().getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.item.description").value(model.getItem().getDescription()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.item.available").value(model.getItem().isAvailable()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.booker.id").value(model.getBooker().getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.booker.name").value(model.getBooker().getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.booker.email").value(model.getBooker().getEmail()));
     }
 
     @Test
@@ -81,8 +94,11 @@ public class BookingControllerTest {
                 .end(LocalDateTime.now().plusHours(1))
                 .build();
 
+        Booking model = BookingMapper.toModel(bookingDto, user, item);
+        model.setId(1);
+        model.setStatus(BookingStatus.APPROVED);
         when(bookingService.getBooking(anyInt(), anyInt()))
-                .thenReturn(BookingMapper.toModel(bookingDto, user, item));
+                .thenReturn(model);
 
         mvc.perform(get("/bookings/1")
                         .header("X-Sharer-User-Id", "1")
@@ -90,7 +106,16 @@ public class BookingControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(model.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.status").value(model.getStatus().toString()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.item.id").value(model.getItem().getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.item.name").value(model.getItem().getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.item.description").value(model.getItem().getDescription()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.item.available").value(model.getItem().isAvailable()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.booker.id").value(model.getBooker().getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.booker.name").value(model.getBooker().getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.booker.email").value(model.getBooker().getEmail()));
     }
 
     @Test
@@ -107,8 +132,10 @@ public class BookingControllerTest {
                 .end(LocalDateTime.now().plusHours(1))
                 .build();
 
+        Booking model = BookingMapper.toModel(bookingDto, user, item);
+        model.setId(1);
         when(bookingService.getAllBookingsByBookerId(anyInt(), any(), anyInt(), anyInt()))
-                .thenReturn(List.of(BookingMapper.toModel(bookingDto, user, item)));
+                .thenReturn(List.of(model));
 
         mvc.perform(get("/bookings")
                         .header("X-Sharer-User-Id", "1")
@@ -116,7 +143,16 @@ public class BookingControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(model.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].item.id").value(model.getItem().getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].item.name").value(model.getItem().getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].item.description").value(model.getItem().getDescription()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].item.available").value(model.getItem().isAvailable()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].booker.id").value(model.getBooker().getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].booker.name").value(model.getBooker().getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].booker.email").value(model.getBooker().getEmail()));
     }
 
     @Test
@@ -133,8 +169,10 @@ public class BookingControllerTest {
                 .end(LocalDateTime.now().plusHours(1))
                 .build();
 
+        Booking model = BookingMapper.toModel(bookingDto, user, item);
+        model.setId(1);
         when(bookingService.getAllBookingByItemsByOwnerId(anyInt(), any(), anyInt(), anyInt()))
-                .thenReturn(List.of(BookingMapper.toModel(bookingDto, user, item)));
+                .thenReturn(List.of(model));
 
         mvc.perform(get("/bookings/owner")
                         .header("X-Sharer-User-Id", "1")
@@ -142,7 +180,16 @@ public class BookingControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(model.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].item.id").value(model.getItem().getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].item.name").value(model.getItem().getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].item.description").value(model.getItem().getDescription()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].item.available").value(model.getItem().isAvailable()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].booker.id").value(model.getBooker().getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].booker.name").value(model.getBooker().getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].booker.email").value(model.getBooker().getEmail()));
     }
 
     @Test
@@ -168,6 +215,7 @@ public class BookingControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error").exists());
     }
 }

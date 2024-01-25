@@ -7,7 +7,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.practicum.shareit.item.dto.CreateItemDto;
+import ru.practicum.shareit.item.dto.ItemBookingCommentDto;
+import ru.practicum.shareit.item.dto.ItemBookingDto;
 import ru.practicum.shareit.item.mapper.ItemMapper;
 import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
@@ -16,6 +19,7 @@ import ru.practicum.shareit.user.model.User;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.*;
@@ -35,8 +39,10 @@ public class ItemControllerTest {
     @Test
     void saveNewItem() throws Exception {
         final CreateItemDto itemDto = new CreateItemDto("test", "testtest", true, 0, null);
+        Item model = ItemMapper.toModel(itemDto, null, null);
+        model.setId(1);
         when(itemService.createItem(any()))
-                .thenReturn(ItemMapper.toModel(itemDto, null, null));
+                .thenReturn(model);
 
         mvc.perform(post("/items")
                         .header("X-Sharer-User-Id", "1")
@@ -44,7 +50,11 @@ public class ItemControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(model.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(itemDto.getDescription()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(itemDto.getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.available").value(itemDto.getAvailable()));
     }
 
     @Test
@@ -58,14 +68,17 @@ public class ItemControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.error").exists());
     }
 
     @Test
     void patchItem() throws Exception {
         final CreateItemDto itemDto = new CreateItemDto("test", "testtest", true, 0, null);
+        Item model = ItemMapper.toModel(itemDto, null, null);
+        model.setId(1);
         when(itemService.editItem(any()))
-                .thenReturn(ItemMapper.toModel(itemDto, null, null));
+                .thenReturn(model);
 
         mvc.perform(patch("/items/1")
                         .header("X-Sharer-User-Id", "1")
@@ -73,14 +86,21 @@ public class ItemControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(model.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(itemDto.getDescription()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(itemDto.getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.available").value(itemDto.getAvailable()));
     }
 
     @Test
     void getItem() throws Exception {
         final CreateItemDto itemDto = new CreateItemDto("test", "testtest", true, 0, null);
-        when(itemService.getById(anyInt()))
-                .thenReturn(ItemMapper.toModel(itemDto, null, null));
+        Item item = ItemMapper.toModel(itemDto, null, null);
+        item.setId(1);
+        ItemBookingCommentDto model = ItemMapper.toItemBookingCommentDto(item, null, null, Collections.emptyList());
+        when(itemService.getItemBookingById(anyInt(), anyInt()))
+                .thenReturn(model);
 
         mvc.perform(get("/items/1")
                         .header("X-Sharer-User-Id", "1")
@@ -88,14 +108,19 @@ public class ItemControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(model.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(model.getDescription()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.name").value(model.getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.available").value(model.getAvailable()));
     }
 
     @Test
     void getAllItems() throws Exception {
         final CreateItemDto itemDto = new CreateItemDto("test", "testtest", true, 0, null);
+        ItemBookingDto model = ItemMapper.toItemBookingDto(ItemMapper.toModel(itemDto, null, null), null, null);
         when(itemService.getAllByOwnerId(anyInt(), anyInt(), anyInt())).thenReturn(List.of(
-                ItemMapper.toItemBookingDto(ItemMapper.toModel(itemDto, null, null), null, null)
+                model
         ));
 
         mvc.perform(get("/items")
@@ -104,14 +129,21 @@ public class ItemControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(model.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].description").value(itemDto.getDescription()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value(itemDto.getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].available").value(itemDto.getAvailable()));
     }
 
     @Test
     void searchAllItems() throws Exception {
         final CreateItemDto itemDto = new CreateItemDto("test", "testtest", true, 0, null);
+        Item model = ItemMapper.toModel(itemDto, null, null);
+        model.setId(1);
         when(itemService.search(anyString(), anyInt(), anyInt()))
-                .thenReturn(List.of(ItemMapper.toModel(itemDto, null, null)));
+                .thenReturn(List.of(model));
 
         mvc.perform(get("/items/search")
                         .header("X-Sharer-User-Id", "1")
@@ -120,7 +152,12 @@ public class ItemControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(model.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].description").value(itemDto.getDescription()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value(itemDto.getName()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].available").value(itemDto.getAvailable()));
     }
 
     @Test
@@ -142,6 +179,9 @@ public class ItemControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(comment.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.text").value(comment.getText()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.authorId").value(comment.getAuthor().getId()));
     }
 }

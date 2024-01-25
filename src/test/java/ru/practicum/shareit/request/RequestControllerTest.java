@@ -7,7 +7,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import ru.practicum.shareit.request.dto.CreateItemRequestDto;
+import ru.practicum.shareit.request.dto.ItemRequestWithItemsDto;
 import ru.practicum.shareit.request.mapper.ItemRequestMapper;
 import ru.practicum.shareit.request.model.ItemRequest;
 import ru.practicum.shareit.request.service.ItemRequestService;
@@ -38,8 +40,10 @@ public class RequestControllerTest {
         CreateItemRequestDto dto = new CreateItemRequestDto();
         dto.setDescription("test");
         User user = new User(1, "test", "test@test.ru");
+        ItemRequest model = ItemRequestMapper.toModel(dto, user);
+        model.setId(1);
         when(requestService.addRequest(any(), anyInt()))
-                .thenReturn(ItemRequestMapper.toModel(dto, user));
+                .thenReturn(model);
 
         mvc.perform(post("/requests")
                         .header("X-Sharer-User-Id", "1")
@@ -47,7 +51,10 @@ public class RequestControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(model.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(dto.getDescription()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.requesterId").value(user.getId()));
     }
 
     @Test
@@ -57,8 +64,10 @@ public class RequestControllerTest {
         User user = new User(1, "test", "test@test.ru");
         ItemRequest itemRequest = ItemRequestMapper.toModel(requestDto, user);
         itemRequest.setItems(Collections.emptyList());
+        ItemRequestWithItemsDto model = ItemRequestMapper.toWithItemsDto(itemRequest);
+        model.setId(1);
         when(requestService.getRequests(anyInt()))
-                .thenReturn(List.of(ItemRequestMapper.toWithItemsDto(itemRequest)));
+                .thenReturn(List.of(model));
 
         mvc.perform(get("/requests")
                         .header("X-Sharer-User-Id", "1")
@@ -66,7 +75,10 @@ public class RequestControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(model.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].description").value(requestDto.getDescription()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].items").value(model.getItems()));
     }
 
     @Test
@@ -76,8 +88,10 @@ public class RequestControllerTest {
         User user = new User(1, "test", "test@test.ru");
         ItemRequest itemRequest = ItemRequestMapper.toModel(requestDto, user);
         itemRequest.setItems(Collections.emptyList());
+        ItemRequestWithItemsDto model = ItemRequestMapper.toWithItemsDto(itemRequest);
+        model.setId(1);
         when(requestService.getRequests(anyInt(), anyInt(), anyInt()))
-                .thenReturn(List.of(ItemRequestMapper.toWithItemsDto(itemRequest)));
+                .thenReturn(List.of(model));
 
         mvc.perform(get("/requests/all")
                         .header("X-Sharer-User-Id", "1")
@@ -85,7 +99,10 @@ public class RequestControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(1))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(model.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].description").value(itemRequest.getDescription()));
     }
 
     @Test
@@ -95,8 +112,10 @@ public class RequestControllerTest {
         User user = new User(1, "test", "test@test.ru");
         ItemRequest itemRequest = ItemRequestMapper.toModel(requestDto, user);
         itemRequest.setItems(Collections.emptyList());
+        ItemRequestWithItemsDto model = ItemRequestMapper.toWithItemsDto(itemRequest);
+        model.setId(1);
         when(requestService.getRequestById(anyInt(), anyInt()))
-                .thenReturn(ItemRequestMapper.toWithItemsDto(itemRequest));
+                .thenReturn(model);
 
         mvc.perform(get("/requests/1")
                         .header("X-Sharer-User-Id", "1")
@@ -104,6 +123,9 @@ public class RequestControllerTest {
                         .characterEncoding(StandardCharsets.UTF_8)
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.id").value(model.getId()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.description").value(requestDto.getDescription()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.items").value(model.getItems()));
     }
 }

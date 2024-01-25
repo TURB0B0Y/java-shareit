@@ -51,7 +51,7 @@ public class ItemServiceImpl implements ItemService {
 
     private User getUserById(int userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new APINotFoundException("Пользователь id %s не найден", userId));
+                .orElseThrow(() -> new APINotFoundException("Пользователь id %d не найден", userId));
     }
 
     @Override
@@ -78,7 +78,7 @@ public class ItemServiceImpl implements ItemService {
     public void deleteItemById(int itemId, int userId) {
         Item item = getById(itemId);
         if (!item.getOwner().getId().equals(userId)) {
-            throw new APIAccessDeniedException("Нет прав на удаление предмета с id %s", itemId);
+            throw new APIAccessDeniedException("Нет прав на удаление предмета с id %d", itemId);
         }
         itemRepository.deleteById(itemId);
     }
@@ -87,7 +87,7 @@ public class ItemServiceImpl implements ItemService {
     @Transactional(readOnly = true)
     public Item getById(int itemId) {
         return itemRepository.findById(itemId)
-                .orElseThrow(() -> new APINotFoundException("Предмет %s не найден ", itemId));
+                .orElseThrow(() -> new APINotFoundException("Предмет %d не найден ", itemId));
     }
 
     @Override
@@ -170,7 +170,7 @@ public class ItemServiceImpl implements ItemService {
 
     private ItemRequest getItemRequestById(int itemRequestId) {
         return itemRequestRepository.findById(itemRequestId)
-                .orElseThrow(() -> new APINotFoundException("Запрос id %s не найден", itemRequestId));
+                .orElseThrow(() -> new APINotFoundException("Запрос id %d не найден", itemRequestId));
     }
 
 }
