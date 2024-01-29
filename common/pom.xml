@@ -11,6 +11,9 @@
     </parent>
 
     <artifactId>shareIt-common</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+
+    <name>ShareIt Common</name>
 
     <dependencies>
         <dependency>
