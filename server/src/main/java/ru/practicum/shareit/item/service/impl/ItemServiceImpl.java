@@ -114,7 +114,10 @@ public class ItemServiceImpl implements ItemService {
     @Transactional(readOnly = true)
     public Collection<ItemBookingDto> getAllByOwnerId(int ownerId, int from, int size) {
 
-        Collection<Item> items = itemRepository.findAllByOwnerId(ownerId, PageRequest.of(from / size, size));
+        Collection<Item> items = itemRepository.findAllByOwnerId(
+                ownerId,
+                PageRequest.of(from / size, size, Sort.by(Sort.Direction.ASC, "id"))
+        );
 
         LocalDateTime nowTime = LocalDateTime.now();
 
@@ -151,7 +154,10 @@ public class ItemServiceImpl implements ItemService {
         if (Objects.isNull(text) || text.isBlank()) {
             return Collections.emptyList();
         }
-        return itemRepository.findAllByNameOrDescription(text, PageRequest.of(from / size, size));
+        return itemRepository.findAllByNameOrDescription(
+                text,
+                PageRequest.of(from / size, size, Sort.by(Sort.Direction.ASC, "id"))
+        );
     }
 
     @Override
