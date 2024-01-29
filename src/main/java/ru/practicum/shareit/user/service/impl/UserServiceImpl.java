@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(readOnly = true)
     public User getUserById(int userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new APINotFoundException("Пользователь id %s не найден", userId));
+                .orElseThrow(() -> new APINotFoundException("Пользователь id %d не найден", userId));
     }
 
     @Override

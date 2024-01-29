@@ -36,7 +36,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(readOnly = true)
     public Booking getBookingById(int bookingId) {
         return bookingRepository.findById(bookingId)
-                .orElseThrow(() -> new APINotFoundException("Бронирование id %s не найдено", bookingId));
+                .orElseThrow(() -> new APINotFoundException("Бронирование id %d не найдено", bookingId));
     }
 
     @Override
@@ -58,16 +58,9 @@ public class BookingServiceImpl implements BookingService {
             throw new APINotFoundException("Предмет %s недоступен для бронирования", item.getId());
         }
 
-        // Проверка работает однако тесты не расчитаны на это и создают несколько пересекающихся брониронирований
-        // Например бронирование 5 будет пересекаться с бронированием 2 и 4
-        // Пример дат:
-        // id=2, start=2024-01-17T20:22:03, end=2024-01-18T20:22:03
-        // id=4, start=2024-01-16T21:22:05, end=2024-01-16T22:22:05
-        // ============
-        // id=5, start=2024-01-16T20:22:13, end=2024-01-17T20:22:10
-        /*if (bookingRepository.existsByStatusAndStartBetweenOrEndBetween(BookingStatus.APPROVED, dto.getStart(), dto.getEnd())) {
+        if (bookingRepository.existsByItem_IdStatusAndStartBetweenOrEndBetween(dto.getItemId(), BookingStatus.APPROVED, dto.getStart(), dto.getEnd())) {
             throw new APINotFoundException("Предмет %s уже забронирован на указанный временной промежуток", item.getId());
-        }*/
+        }
 
         User booker = getUserById(userId);
 
@@ -82,10 +75,10 @@ public class BookingServiceImpl implements BookingService {
     public Booking approveBooking(int bookingId, boolean approved, int userId) {
         Booking booking = getBookingById(bookingId);
         if (!booking.getItem().getOwner().getId().equals(userId)) {
-            throw new APINotFoundException("Бронирование %s не найдено", bookingId);
+            throw new APINotFoundException("Бронирование %d не найдено", bookingId);
         }
         if (booking.getStatus() != BookingStatus.WAITING) {
-            throw new APIBadRequestException("Бронирование %s не находится в статусе ожидания", bookingId);
+            throw new APIBadRequestException("Бронирование %d не находится в статусе ожидания", bookingId);
         }
         if (approved) {
             booking.setStatus(BookingStatus.APPROVED);
@@ -102,7 +95,7 @@ public class BookingServiceImpl implements BookingService {
         int itemOwnerId = booking.getItem().getOwner().getId();
         int bookerOwnerId = booking.getBooker().getId();
         if (itemOwnerId != userId && bookerOwnerId != userId) {
-            throw new APINotFoundException("Бронирование %s не найдено", bookingId);
+            throw new APINotFoundException("Бронирование %d не найдено", bookingId);
         }
         return booking;
     }
@@ -111,7 +104,7 @@ public class BookingServiceImpl implements BookingService {
     @Transactional(readOnly = true)
     public List<Booking> getAllBookingsByBookerId(int userId, BookingState state, int from, int size) {
         if (!userRepository.existsById(userId)) {
-            throw new APINotFoundException("Пользователь %s не найден", userId);
+            throw new APINotFoundException("Пользователь %d не найден", userId);
         }
 
         List<Booking> bookings;
@@ -178,12 +171,12 @@ public class BookingServiceImpl implements BookingService {
 
     private User getUserById(int userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new APINotFoundException("Пользователь id %s не найден", userId));
+                .orElseThrow(() -> new APINotFoundException("Пользователь id %d не найден", userId));
     }
 
     private Item getItemById(int itemId) {
         return itemRepository.findById(itemId)
-                .orElseThrow(() -> new APINotFoundException("Предмет %s не найден ", itemId));
+                .orElseThrow(() -> new APINotFoundException("Предмет %d не найден ", itemId));
     }
 
 }

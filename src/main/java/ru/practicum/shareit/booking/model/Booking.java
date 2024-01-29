@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @ToString
 @Table(name = "bookings")
 @NoArgsConstructor
+@EqualsAndHashCode
 @AllArgsConstructor
 public class Booking {
 

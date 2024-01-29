@@ -52,7 +52,7 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
 
     Optional<Booking> findFirstByItem_IdAndBooker_IdAndEndBefore(int itemId, int userId, LocalDateTime now);
 
-    @Query("select count(1)>0 from Booking b where status = :bookingStatus" +
+    @Query("select count(1)>0 from Booking b where b.item.id = :itemId and status = :bookingStatus" +
             " and ((b.start between :startTime and :endTime) or (b.end between :startTime and :endTime))")
-    boolean existsByStatusAndStartBetweenOrEndBetween(BookingStatus bookingStatus, LocalDateTime startTime, LocalDateTime endTime);
+    boolean existsByItem_IdStatusAndStartBetweenOrEndBetween(int itemId, BookingStatus bookingStatus, LocalDateTime startTime, LocalDateTime endTime);
 }
