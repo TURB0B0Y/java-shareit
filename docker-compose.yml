@@ -1,9 +1,9 @@
 version: '3.8'
 services:
   gateway:
-    build: shareIt-gateway
-    image: shareIt-gateway
-    container_name: shareit-gateaway-container
+    build: gateway
+    image: gateway
+    container_name: gateaway-container
     ports:
       - "8080:8080"
     depends_on:
@@ -12,9 +12,9 @@ services:
       - SHAREIT_SERVER_URL=http://server:9090
 
   server:
-    build: shareIt-server
-    image: shareIt-server
-    container_name: shareit-server-container
+    build: server
+    image: server
+    container_name: server-container
     ports:
       - "9090:9090"
     depends_on:
@@ -26,7 +26,7 @@ services:
 
   db:
     image: postgres:latest
-    container_name: shareit-db-container
+    container_name: db-container
     ports:
       - "6541:5432"
     environment:
