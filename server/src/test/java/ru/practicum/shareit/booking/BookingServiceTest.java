@@ -93,7 +93,7 @@ public class BookingServiceTest {
         item.setId(1);
         itemRepository.save(item);
 
-        assertThrows(APIBadRequestException.class, () -> bookingService.createBooking(dto, bookerId));
+        assertThrows(APINotFoundException.class, () -> bookingService.createBooking(dto, bookerId));
     }
 
     @Test
@@ -111,24 +111,6 @@ public class BookingServiceTest {
         item.setAvailable(false);
 
         when(itemRepository.findById(anyInt())).thenReturn(Optional.of(item));
-
-        assertThrows(APIBadRequestException.class, () -> bookingService.createBooking(dto, owner.getId()));
-    }
-
-    @Test
-    void addBooking_whenEndDateIsBeforeStartDate() {
-        CreateBookingDto dto = CreateBookingDto.builder()
-                .itemId(1)
-                .start(LocalDateTime.now())
-                .end(LocalDateTime.now().minusHours(1))
-                .build();
-
-        User owner = new User(1, "test2", "test2@test.com");
-        CreateItemDto itemDto = new CreateItemDto("TestItem", "DescriptionTest", true, null, null);
-        Item item = ItemMapper.toModel(itemDto, owner, null);
-        item.setId(1);
-        item.setAvailable(true);
-        dto.setEnd(LocalDateTime.now().plusDays(-1));
 
         assertThrows(APIBadRequestException.class, () -> bookingService.createBooking(dto, owner.getId()));
     }

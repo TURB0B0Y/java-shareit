@@ -13,6 +13,8 @@ import ru.practicum.shareit.item.dto.ItemDto;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.PositiveOrZero;
+import java.util.Collections;
+import java.util.Objects;
 
 @Slf4j
 @RestController
@@ -72,6 +74,9 @@ public class ItemController {
             @RequestParam(defaultValue = "10") @Min(1) int size
     ) {
         log.info("user {} search item {} {} {}", userId, text, from, size);
+        if (Objects.isNull(text) || text.isBlank()) {
+            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+        }
         return itemClient.search(userId, text, from, size);
     }
 

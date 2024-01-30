@@ -11,7 +11,6 @@ import ru.practicum.shareit.item.model.Comment;
 import ru.practicum.shareit.item.model.Item;
 import ru.practicum.shareit.item.service.ItemService;
 
-import javax.validation.Valid;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,7 +26,7 @@ public class ItemController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ItemDto createItem(@RequestBody @Valid CreateItemDto dto, @RequestHeader("X-Sharer-User-Id") int userId) {
+    public ItemDto createItem(@RequestBody CreateItemDto dto, @RequestHeader("X-Sharer-User-Id") int userId) {
         dto.setOwnerId(userId);
         log.info("user {} create item {}", userId, dto);
         Item item = itemService.createItem(dto);

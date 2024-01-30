@@ -41,4 +41,23 @@ public class BookingControllerTest {
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void addBooking_whenEndDateIsBeforeStartDate() throws Exception {
+        CreateBookingDto dto = CreateBookingDto.builder()
+                .itemId(1)
+                .start(LocalDateTime.now())
+                .end(LocalDateTime.now().minusHours(1))
+                .build();
+        dto.setEnd(LocalDateTime.now().plusDays(-1));
+
+        mvc.perform(post("/bookings")
+                        .header("X-Sharer-User-Id", "1")
+                        .content(mapper.writeValueAsString(dto))
+                        .characterEncoding(StandardCharsets.UTF_8)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
+    }
+
 }

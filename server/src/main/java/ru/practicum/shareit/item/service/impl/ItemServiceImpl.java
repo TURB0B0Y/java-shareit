@@ -151,9 +151,6 @@ public class ItemServiceImpl implements ItemService {
     @Override
     @Transactional(readOnly = true)
     public List<Item> search(String text, int from, int size) {
-        if (Objects.isNull(text) || text.isBlank()) {
-            return Collections.emptyList();
-        }
         return itemRepository.findAllByNameOrDescription(
                 text,
                 PageRequest.of(from / size, size, Sort.by(Sort.Direction.ASC, "id"))

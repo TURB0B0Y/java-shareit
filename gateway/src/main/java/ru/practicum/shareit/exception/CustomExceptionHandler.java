@@ -27,7 +27,7 @@ public class CustomExceptionHandler {
     @ExceptionHandler({
             MethodArgumentNotValidException.class,
             MissingRequestHeaderException.class,
-            NullPointerException.class
+            APIBadRequestException.class
     })
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map.Entry<String, String> handleBadRequestException(Exception e) {

@@ -7,9 +7,11 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.CreateBookingDto;
 import ru.practicum.shareit.booking.model.BookingState;
+import ru.practicum.shareit.exception.APIBadRequestException;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import java.time.LocalDateTime;
 
 @Slf4j
 @RestController
@@ -27,6 +29,13 @@ public class BookingController {
             @RequestHeader("X-Sharer-User-Id") int userId
     ) {
         log.info("createBooking {} from {}", dto, userId);
+        LocalDateTime nowTime = LocalDateTime.now();
+        if (dto.getStart().isBefore(nowTime)) {
+            throw new APIBadRequestException("Дата начала %s находится в прошлом. Время сервера: [%s]", dto.getStart(), nowTime);
+        }
+        if (!dto.getEnd().isAfter(dto.getStart())) {
+            throw new APIBadRequestException("Дата начала %s после либо равна дате окончания %s", dto.getStart(), dto.getEnd());
+        }
         return bookingClient.createBooking(dto, userId);
     }
 

@@ -42,14 +42,6 @@ public class BookingServiceImpl implements BookingService {
     @Override
     @Transactional
     public Booking createBooking(CreateBookingDto dto, int userId) {
-        LocalDateTime nowTime = LocalDateTime.now();
-        if (dto.getStart().isBefore(nowTime)) {
-            throw new APIBadRequestException("Дата начала %s находится в прошлом. Время сервера: [%s]", dto.getStart(), nowTime);
-        }
-        if (!dto.getEnd().isAfter(dto.getStart())) {
-            throw new APIBadRequestException("Дата начала %s после либо равна дате окончания %s", dto.getStart(), dto.getEnd());
-        }
-
         Item item = getItemById(dto.getItemId());
         if (!item.isAvailable()) {
             throw new APIBadRequestException("Предмет %s недоступен для бронирования", item.getId());
